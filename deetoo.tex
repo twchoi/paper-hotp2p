@@ -116,13 +116,13 @@ load over entire network. \\
 %evenly over the network, we avoid creating \emph{hotspots} and improve 
 %the probability of finding rare objects.\\
 {\bf Efficient data update/deletion:} In unstructured search systems, 
-data items are replicated by broadcasting and once an item is broadcasted, 
+once an item is broadcasted for replication, 
 there is no easy way to trace the location of replicated data. 
 This makes it difficult to update or delete all the replicated data.
-Deetoo replicates data items via bounded broadcasting. 
-The range of bounded broadcasting is maintained with each replicated data item.  
+The range of bounded broadcasting in Deetoo is maintained with 
+each replicated data item.  
 The range information is used for maintaining
-the number of replicas over the network and for deleting all the data items.
+and for deleting the data items.
 
 This paper evaluates the novel Deetoo algorithm from a theoretical 
 standpoint and through simulation. 
@@ -216,9 +216,11 @@ where queries succeed with a high probability.
 \subsection{A Distributed unstructured table}
 Our setting will be the standard P2P setting: there are $N$ nodes which can
 communicate, store objects and perform queries.  In addition to nodes, there
-are also bins.  Bins may or may not be occupied by a particular node.  The
-number of bins is assumed to be fixed at some very large number, for instance
-$2^{160}$.  The bins are arranged in a rectangular array, which in this work
+are also bins.  
+%Bins may or may not be occupied by a particular node.  
+The number of bins is assumed to be fixed at some very large number, 
+for instance $2^{160}$.  
+The bins are arranged in a rectangular array, which in this work
 we will assume to be square.  In the data structure of
 Section \ref{sec:localtab}, each row and column intersect at exactly one
 bin that may or may not be occupied by a node.  Instead of
@@ -239,14 +241,16 @@ routable 1-D P2P networks such as Chord\cite{is:Chord} and the small-world
 model\cite{jk:Algorithmic}.  Rather than build a P2P network that is
 explicitly two dimensional, we build two sub-graphs, each of which is a 1-D 
 ring, which we can call the query ring and the cache ring.  Each P2P 
-node has exactly one address, and hence position, on each ring.  This is
-depicted in Figures \ref{fig:cache}, \ref{fig:query}, and \ref{fig:combined}; 
-these drawings illustrate how  1-D rings for querying and caching 
+node has exactly one address, and hence position, on each ring.  
+%This is depicted in 
+Figures \ref{fig:cache}, \ref{fig:query}, and \ref{fig:combined} 
+%these drawings 
+illustrate how  1-D rings for querying and caching 
 locally overlay atop of the 2-D Deetoo array.
-A node is located at $i$ with probability $c_{i}$ and a
+A cache node is located at $i$ with probability $c_{i}$ and a
 query node is placed at location $j$ with probability $q_{j}$ in the query ring. 
 $N(x)$ and $N(x^\prime)$ denote nodes whose addresses are $x$ and $x^\prime$, respectively.
-$x^\prime$ is transposed address of $x$.
+%$x^\prime$ is transposed address of $x$.
 
 To create an ordering on the cache ring of increasing
 along the columns and the query ring of increasing along the rows, the bin
@@ -291,8 +295,8 @@ in the sub-range $[b_i, b_{i+1})$. If there is no connection to a node in the su
 the recursion is ended and the node stays in the tree as a leaf node.
 To the final
 neighbor ($b_F$), $x$ sends a bounded broadcast in the range of $[b_F, y]$.
-When a node receives a message to a range that contains its own address
-the message is delivered to that node in addition to being routed to others.
+%When a node receives a message to a range that contains its own address
+%the message is delivered to that node in addition to being routed to others.
 Figure \ref{fig:tree} shows how this bounded broadcast forms a local 
 tree recursively. The time required for this is $O(\log^2 N)$ as 
 shown in Section \ref{sec:search_time}.
@@ -329,9 +333,9 @@ region for the bounded broadcast.}
 \end{figure*}
 \end{center}
 \subsection{Data Insertion and Query}\label{sec:cache}
-Deetoo is a search algorithm on a specific network structure. When an object
+%Deetoo is a search algorithm on a specific network structure. When an object
 is inserted at a node $a$ as in Figure \ref{fig:cache1}, 
-Deetoo selects, at random, a range for local broadcasting.
+Deetoo selects, at random, a range for bounded broadcasting.
 Node $a$ starts greedy routing to find a node 
 $n$ in the range and $n$ starts bounded broadcasting 
 within the range on the caching ring to replicate the object
@@ -345,9 +349,9 @@ eventually receive a copy of an object, $o$ (Figure \ref{fig:cache3}).
 
 Query resolution follows the same bounded broadcasting steps. The only
 difference is that the query resolution is executed in the querying
-space in which every node's address is transposed (stated  
-in Section \ref{sec:table}) in
-the caching space. 
+space. 
+%in which every node's address is transposed (stated  
+%in Section \ref{sec:table}) in the caching space. 
 %Bounded broadcasting size for a query, $Q$, follows the same formulation 
 %as the caching size $C$ as shown above. 
 Figures
@@ -414,9 +418,11 @@ $a^\prime$.} \label{fig:query1}
 
 \subsection{Node Joins, Leaves, and Stabilization}\label{sec:join}
 Deetoo requires that each data object is replicated over the desired 
-range in a network. However, a new node joins the network with no replicated 
-objects. 
-We want a constant success probability regardless of node joining or leaving.
+range.
+% in a network. 
+However, a new node joins the network with no replicated objects. 
+We want a constant success probability regardless of network dynamics.
+%joining or leaving.
 Since objects should appear on all nodes for the range into which they were
 inserted, it is necessary to replicate objects when a new node joins.
 Deetoo relies on a new node copying objects from its new neighbors. 
@@ -425,8 +431,10 @@ We define this replicating process as \emph{stabilization} in this paper.
 When a new node joins a network, the following steps are taken:
 A new node picks a random address, then it makes a connection to two adjacent
 neighbors and one short-cut neighbor based on Kleinberg's
-\emph{inverse $r^{th}$-power distribution}. As a final step, it copies objects 
-from a neighbor in the same column in matrix space.
+\emph{inverse $r^{th}$-power distribution}. As a final step, 
+it copies objects 
+from neighbors only if its address is in each object's range.
+% in the same column in matrix space.
 %\begin{enumerate}
 %\item select two different random addresses, 
 %\item calculate minimum ring distances to neighboring nodes which have 
@@ -480,25 +488,27 @@ replication factor. In the stage of stabilization, the node is able to receive o
 from both neighbors. The maximum number of objects which need to be transferred is limited to 
 $O(\frac{1}{\sqrt{N}})$.
 \fi
-We analyze \emph{stabilization cost} in Section \ref{sec:stabilization_cost}. 
-We also simulate stabilization cost at the time of new node joins 
-under churn and compare the simulation result with an analytical model.  
-The simulation result shows that Deetoo requires very low stabilization cost. 
+We analyze \emph{stabilization cost} in Section \ref{sec:stabilization_cost} 
+and simulate it at the time of new node joins.
+%and compare the simulation result with an analytical model.  
+%The simulation result shows that Deetoo requires very low stabilization cost. 
 When a node leaves or fails, our protocol
 does not need to do anything because all objects have already been copied to
 all nodes in the same set of columns. Thus, neighbor nodes keep exactly
 the copies of the objects held by leaving or failing nodes.
 
 \section{Analysis of Deetoo}\label{sec:analysis}
-Our analysis focuses on the probability of a query being successfully resolved
-($P_{s}$), the communication cost ($K$), and the search time ($T$),
-to show that the Deetoo protocol for unstructured P2P
-networks is efficient and scalable. We assume that
+Our analysis focuses on the query success probability ($P_{s}$), 
+the communication cost ($K$), and the search time ($T$),
+to show that the Deetoo protocol
+% for unstructured P2P networks 
+is efficient and scalable. We assume that
 address space ($B$) is fixed as $B=m$ $\times$
-$m$. Additionally, the caching probability we
-cache at $i$, $c_{i}$, and the querying
-probability we put a query at $j$, $q_{j}$, are both
-uniformly distributed. 
+$m$. Additionally, the caching probability ($c_i$) 
+and the querying probability $q_j$
+%we cache at $i$, $c_{i}$, and the querying
+%probability we put a query at $j$, $q_{j}$, 
+are both uniformly distributed. 
 %Third, the caching and querying probability are the same at any location. 
 Finally, at most one node per
 a bin in matrix space is allowed for all nodes to have a unique
@@ -507,7 +517,7 @@ address.
 %exact matching search. 
 
 
-\subsection{Success Probability}
+\subsection{Query Success Probability}
 \label{sec:suc_prob}
 In Deetoo, queries are unstructured and load-balanced, which means
 that the probability that a given node receives a query is independent
@@ -549,7 +559,7 @@ independent of the number of the nodes.
 In order to check the network's scalability, communication costs
 are examined in this section. Each caching message is transferred to all the
 nodes in the shaded area in Figure \ref{fig:cache3}, and this area has
-$C\sqrt{B}$ bins. By default, we set cache and query ranges are equally.
+$C\sqrt{B}$ bins. By default, we set cache and query ranges equally.
 The expected number of nodes per bin is $p=N/B$.
 From the previous section we see
 $C = Q = \sqrt{\alpha B/N}$; therefore the expect caching cost or querying
@@ -588,16 +598,15 @@ From the Kleinberg's model, each node has a long-range
 contact at distance \textit{r} with probability 
 $p_{r}=\frac{1}{\log N}\frac{1}{r}$ as in Figure \ref{fig:search}. 
 Let \textit{$p_{m}$} be the probability that node \textit{a} has a long-range
-contact in the middle, \textit{$mL$} region.
+contact in the middle, \textit{$mL$} region, where $m\in (0,1)$.
 \begin{eqnarray*}
 p_{m} &=& \sum_{r=\frac{1-m}{2}L}^{\frac{1+m}{2}L}p_{r} = \sum_{r=\frac{1-m}{2}L}^{\frac{1+m}{2}L}\frac{1}{\log
         N}\frac{1}{r}\\
         &\simeq& \frac{1}{\log N}\log\left(\frac{1+m}{1-m}\right)
 \end{eqnarray*}
-Since \textit{$mL$} is a subset of \textit{$L$},
-$m\in (0,1)$. 
+%Since \textit{$mL$} is a subset of \textit{$L$}, $m\in (0,1)$. 
 Let $T(i)$ be the search time in region of size $i$.
-Each long range connection either goes to a node in the
+Each long-range connection either goes to a node in the
 middle region or not.
 If we make it into the middle region, the remaining area
 to search is at most the length of $\frac{1}{2}L + \frac{m}{2}L$.
@@ -605,7 +614,6 @@ Thus,
 if the long-range connection goes to the middle, the time is 
 $T(L) \leq 1 + T((\frac{1+m}{2})L)$. 
 Otherwise, we go to the next neighbor so $T(L) = 1 + T(L-1)$.
-We know that $T(L-1) < T(L)$.  
 %If $p_m$ is the probability of making it into the middle, on average, 
 We need to try $1/p_m$ neighbors before
 we are likely to find a connection to the middle.  Putting this together,
@@ -680,8 +688,8 @@ and the length of bounded broadcasting range ($d_{ave}\sqrt{\alpha N}$), respect
 %Since $L = \sqrt{\alpha N}d_{ave}$ and $B = d_{ave}N$, 
 
 \section{Simulation Results}\label{sec:simulation}
-Our theory results are in terms of $N$, the
-size of the network, but local nodes only have estimates of network
+Our theoretical results are in terms of $N$, the network size, 
+but local nodes only have estimates of network
 size.  We see in this section that following the protocol with network
 size estimates based on local node density\cite{LuoQHC08}
 does not cause significant deviation from our theory.
@@ -722,7 +730,7 @@ Our simulations are performed on networks of size 10 to $10^{6}$.
 The number of columns, $C$, is chosen such that $C$ is equal to the number of rows, $Q$, 
 $C^2 = \alpha N$. Thus, we simulate various values of $\alpha$ to observe the effect of
 increasing or decreasing the cache or query range size ($\alpha=\frac{C^2}{N}$). 
-We performed simulations with $\alpha$=0.1 to 5.0, with intermediate steps of size 0.5.
+We performed simulations with $\alpha$=1 to 5, with intermediate steps of size 1.
 100 string objects were generated by using a random string generator.
 %Each object was initially inserted on a uniformly randomly selected
 %node.
@@ -773,14 +781,15 @@ more than $\log N$, less than $\log^2 N$.} \label{fig:time}
 \end{figure}
 
 \subsection{Robustness}
-Due to the nature of P2P networks, each peer can leave or fail 
-at any time. Therefore, it is important to analyze the effect of node failures.
+Due to the dynamics of P2P networks,
+it is important to analyze the effect of node failures.
 We will show that data objects are still accessible without generating 
-excessive managing overheads under dynamic networks.
+excessive managing overheads under churn.
 %We extended Netmodeler %\cite{netmodeler} 
 %to model massive churn on nodes. 
 %The simulator setting is described below.
-We set the network size first. Each node joins the network sequentially
+%We set the network size first. 
+In our simulation model, each node joins the network sequentially
 following a uniform distribution.
 Upon completing network formation with a given size, each node repeatedly 
 leaves and joins.
@@ -823,7 +832,8 @@ For simplicity, a replication factor, $\alpha$, is set to 1.
 \end{figure}
 Figure \ref{fig:hit_churn} demonstrates how the churn affects success probability.
 Note that success probability remains constant which shows that Deetoo is robust against churn. 
-Also, the success probability still follows the theory as described in Section \ref{sec:suc_prob}.
+Also, the success probability still follows the theory.
+% as described in Section \ref{sec:suc_prob}.
 %This result shows that Deetoo is robust against network dynamics. 
 
 \begin{figure}
@@ -843,14 +853,14 @@ $\sqrt{N}$ nodes, we have $k$ $\sqrt{N}$ total objects in the system.
 %so 
 The expected number of objects on each node is $k/\sqrt{N}$. 
 Thus, joining cost is directly proportional to $1/\sqrt{N}$.
-
 Figure \ref{fig:stab_cost} shows that how many replication occurred per unique
 data object after new nodes joined. 
-For the measure of stabilization cost, 
-the size of network is set to 1,000 initially. 
+%For the measure of stabilization cost, 
+%the size of network is set to 1,000 initially. 
 Note that stabilization cost grows not as time continues, but as the number of unique 
 objects increases.
-Unlike DHT-based stabilization, our process is much simpler, and costs less.
+Our process is much simpler and costs less than DHT-based stabilization.
+%Unlike DHT-based stabilization, our process is much simpler, and costs less.
 %explain more, what is DHT's cost? compare directly to our cost
 With very low maintenance cost, Deetoo is capable of efficient data retrieval 
 even under heavy churn.
@@ -859,7 +869,8 @@ even under heavy churn.
 \label{sec:related_works}
 Highly structured P2P networks with DHT look-up algorithms 
 \cite{is:Chord, sr:CAN, bz:Tapestry, pr:Symphony} 
-are efficient in that these networks achieve low query costs  
+are efficient 
+in terms of query cost %in that these networks achieve low query costs  
 because they place data objects at particular points on the network topology
 which are determined by an object's key. 
 %Beehive\cite{re:beehive04} 
@@ -897,9 +908,14 @@ range queries on top of structured overlays.
 In \emph{SWORD} and \emph{MAAN}, DHT is created for each attribute.
 The number of created DHTs is the same as the number of attributes.
 \emph{Mercury} also maintains a logical overlay for each attribute but
-it does not use DHTs. These systems can outperforms Deetoo in terms of
-query success probability and query cost with the help of DHT. However, 
-maintaining multiple overlays costs network traffic
+it does not use DHTs. For few parameters and very narrow range queries,
+these systems can outperforms Deetoo. 
+Otherwise for large numbers of parameters and larger query ranges, 
+Deetoo can perform better as it always requires the same $O(\sqrt{N})$
+complexity regardless of query or data type.
+Another drawback of DHT-based range query systems
+that maintaining multiple overlays 
+costs network traffic
 because update traffic increases as the number of attributes are 
 increased. Deetoo creates two overlays and update traffic takes 
 place only in caching overlay. Moreover, data is not structured,
@@ -1003,10 +1019,11 @@ which match some query can be run over Deetoo.
 
 In our future work, we plan to implement this searching algorithm
 on Planet-Lab nodes and to compare the performance of Deetoo with
-existing search schemes. Additionally, due to the
-fact that Deetoo is already a randomized algorithm, we are
-investigating optimal approaches for dealing with lossy communications
-such UDP/IP datagrams which go beyond naive hop-by-hop retransmission.
+existing search schemes. 
+%Additionally, due to the
+%fact that Deetoo is already a randomized algorithm, we are
+%investigating optimal approaches for dealing with lossy communications
+%such UDP/IP datagrams which go beyond naive hop-by-hop retransmission.
 
 \bibliographystyle{IEEEtran}
 \bibliography{d2}
